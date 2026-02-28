@@ -7,6 +7,7 @@ local RunService = game:GetService("RunService")
 local TextChatService = game:GetService("TextChatService")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Local references
 local localPlayer = Players.LocalPlayer
@@ -20,6 +21,7 @@ local TARGET_USER = nil
 local FOLLOW_SPEED = 25
 local SPIN_SPEED = 10
 local FOLLOW_DISTANCE = 3 -- Distance to maintain from target
+local LINEUP_OFFSET = 3 -- Distance to stand next to controller
 
 -- State management
 local states = {
@@ -32,6 +34,29 @@ local states = {
 local currentSpinSpeed = SPIN_SPEED
 local currentFollowTarget = nil
 local floatConnection = nil
+
+-- Function to send chat messages
+local function sendChatMessage(message)
+    -- Try TextChatService (new chat)
+    local success, err = pcall(function()
+        local textChannel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+        if textChannel then
+            textChannel:SendAsync(message)
+            return
+        end
+        -- Fallback to legacy chat
+        local sayMessageRequest = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and
+                                 ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
+        if sayMessageRequest then
+            sayMessageRequest:FireServer(message, "All")
+        else
+            warn("Chat system not found, cannot send message.")
+        end
+    end)
+    if not success then
+        warn("Failed to send chat message:", err)
+    end
+end
 
 -- GUI Creation
 local screenGui = Instance.new("ScreenGui")
@@ -158,7 +183,7 @@ local commandLayout = Instance.new("UIListLayout")
 commandLayout.Padding = UDim.new(0, 5)
 commandLayout.Parent = commandsList
 
--- Command list
+-- Command list (updated with !lineup)
 local commands = {
     "!goto [user] - Teleport to player",
     "!loopgoto [user] - Loop teleport",
@@ -169,6 +194,8 @@ local commands = {
     "!unfollow - Stop following",
     "!float [height] - Float in air",
     "!unfloat - Stop floating",
+    "!say [message] - Make player say something",
+    "!lineup - Line up next to controller",
     "!view [user] - View target",
     "!unview - Reset view",
     "!sit - Make character sit",
@@ -299,7 +326,7 @@ local function stopSpinning()
     states.isSpinning = false
 end
 
--- Follow function (MODIFIED to follow 3 studs before target)
+-- Follow function (follows 3 studs before target)
 local function startFollowing(targetName)
     local targetPlayer = findPlayer(targetName)
     if not targetPlayer then return end
@@ -405,7 +432,25 @@ local function stopFloating()
     end
 end
 
--- Command parser
+-- Lineup function (new)
+local function lineupNextToController()
+    if not TARGET_USER then return end
+    local controllerRoot = getCharacterRoot(TARGET_USER)
+    if controllerRoot and humanoidRootPart then
+        -- Calculate offset to the right of the controller (3 studs)
+        local offset = controllerRoot.CFrame.RightVector * LINEUP_OFFSET
+        local newPosition = controllerRoot.Position + offset
+        -- Set our CFrame to face the same direction as the controller
+        humanoidRootPart.CFrame = CFrame.new(newPosition, newPosition + controllerRoot.CFrame.LookVector)
+        -- Optionally stop any following/spinning states to avoid conflict
+        stopFollowing()
+        stopSpinning()
+        stopFloating()
+        states.isLoopGoto = false
+    end
+end
+
+-- Command parser (updated with !lineup)
 local function parseCommand(message)
     if not TARGET_USER then return end
     
@@ -452,6 +497,18 @@ local function parseCommand(message)
         
     elseif command == "!unfloat" then
         stopFloating()
+        
+    -- Say command
+    elseif command == "!say" then
+        -- Combine all remaining arguments into a single message
+        if #args >= 2 then
+            local sayMessage = table.concat(args, " ", 2)
+            sendChatMessage(sayMessage)
+        end
+        
+    -- Lineup command
+    elseif command == "!lineup" then
+        lineupNextToController()
         
     -- View command
     elseif command == "!view" and args[2] then
@@ -501,7 +558,7 @@ local function setupChatListener()
     
     -- Legacy chat system
     local success, err = pcall(function()
-        local chatEvents = game:GetService("ReplicatedStorage"):FindFirstChild("DefaultChatSystemChatEvents")
+        local chatEvents = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
         if chatEvents then
             local onMessageDone = chatEvents:FindFirstChild("OnMessageDoneFiltering")
             if onMessageDone then
@@ -525,6 +582,12 @@ setButton.MouseButton1Click:Connect(function()
             TARGET_USER = player
             usernameBox.Text = player.Name
             print("Target set to:", player.Name)
+            
+            -- Teleport to the player
+            teleportToPlayer(player.Name)
+            
+            -- Send greeting message
+            sendChatMessage("Hello " .. player.Name .. " how may I assist you.")
         else
             usernameBox.Text = "Player not found"
             TARGET_USER = nil
