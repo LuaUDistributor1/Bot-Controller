@@ -1,4 +1,4 @@
--- Trapit's Commands v2.0
+-- Trapit's Commands
 -- Works on external executors
 
 -- Services
@@ -71,52 +71,52 @@ screenGui.ResetOnSpawn = false
 
 -- Main Frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 350, 0, 450)
-mainFrame.Position = UDim2.new(0, 10, 0.5, -225)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+mainFrame.Size = UDim2.new(0, 350, 0, 405)
+mainFrame.Position = UDim2.new(0, 10, 0.5, -202.5)
+mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Pure dark black
 mainFrame.BackgroundTransparency = 0.1
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
 mainFrame.Parent = screenGui
 
--- Gradient
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 100, 200)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 0, 200))
-})
-gradient.Rotation = 90
-gradient.Parent = mainFrame
-
 -- Title
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 40)
 title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 title.BackgroundTransparency = 0.5
-title.Text = "Trapit's Commands v2.0"
+title.Text = "Trapit's Commands"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 18
 title.Parent = mainFrame
 
--- Close button
+-- White to black gradient on title text
+local titleGradient = Instance.new("UIGradient")
+titleGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)), -- White
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))        -- Black
+})
+titleGradient.Rotation = 90
+titleGradient.Parent = title
+
+-- Close button (grey background)
 local closeButton = Instance.new("TextButton")
 closeButton.Size = UDim2.new(0, 30, 0, 30)
 closeButton.Position = UDim2.new(1, -35, 0, 5)
 closeButton.Text = "X"
-closeButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+closeButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80) -- Grey
 closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 closeButton.Font = Enum.Font.GothamBold
 closeButton.TextSize = 14
 closeButton.Parent = mainFrame
 
--- Minimize button
+-- Minimize button (grey background)
 local minimizeButton = Instance.new("TextButton")
 minimizeButton.Size = UDim2.new(0, 30, 0, 30)
 minimizeButton.Position = UDim2.new(1, -70, 0, 5)
 minimizeButton.Text = "-"
-minimizeButton.BackgroundColor3 = Color3.fromRGB(255, 180, 0)
+minimizeButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80) -- Grey
 minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 minimizeButton.Font = Enum.Font.GothamBold
 minimizeButton.TextSize = 14
@@ -131,7 +131,7 @@ inputFrame.Parent = mainFrame
 
 local usernameLabel = Instance.new("TextLabel")
 usernameLabel.Size = UDim2.new(1, 0, 0, 20)
-usernameLabel.Text = "Target Controller:"
+usernameLabel.Text = "Controller:"
 usernameLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
 usernameLabel.Font = Enum.Font.GothamBold
 usernameLabel.TextSize = 14
@@ -149,11 +149,12 @@ usernameBox.Font = Enum.Font.Gotham
 usernameBox.TextSize = 14
 usernameBox.Parent = inputFrame
 
+-- Set button (grey background)
 local setButton = Instance.new("TextButton")
 setButton.Size = UDim2.new(0, 60, 0, 35)
 setButton.Position = UDim2.new(1, -60, 0, 25)
 setButton.Text = "SET"
-setButton.BackgroundColor3 = Color3.fromRGB(0, 180, 255)
+setButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80) -- Grey
 setButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 setButton.Font = Enum.Font.GothamBold
 setButton.TextSize = 14
@@ -161,7 +162,7 @@ setButton.Parent = inputFrame
 
 -- Commands display
 local commandsFrame = Instance.new("Frame")
-commandsFrame.Size = UDim2.new(1, -20, 0, 290)
+commandsFrame.Size = UDim2.new(1, -20, 0, 265)
 commandsFrame.Position = UDim2.new(0, 10, 0, 140)
 commandsFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 commandsFrame.BackgroundTransparency = 0.2
@@ -188,7 +189,7 @@ local commandLayout = Instance.new("UIListLayout")
 commandLayout.Padding = UDim.new(0, 5)
 commandLayout.Parent = commandsList
 
--- Command list (updated with !lineup and !cmds)
+-- Command list with white text
 local commands = {
     "!goto [user] - Teleport to player",
     "!loopgoto [user] - Loop teleport",
@@ -218,7 +219,7 @@ for _, command in ipairs(commands) do
     local cmdLabel = Instance.new("TextLabel")
     cmdLabel.Size = UDim2.new(1, 0, 1, 0)
     cmdLabel.Text = command
-    cmdLabel.TextColor3 = Color3.fromRGB(180, 220, 255)
+    cmdLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- White text
     cmdLabel.Font = Enum.Font.Gotham
     cmdLabel.TextSize = 12
     cmdLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -229,36 +230,6 @@ for _, command in ipairs(commands) do
 end
 
 commandsList.CanvasSize = UDim2.new(0, 0, 0, #commands * 30)
-
--- Status bar
-local statusBar = Instance.new("Frame")
-statusBar.Size = UDim2.new(1, 0, 0, 25)
-statusBar.Position = UDim2.new(0, 0, 1, -25)
-statusBar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-statusBar.BackgroundTransparency = 0.5
-statusBar.Parent = mainFrame
-
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(1, -10, 1, 0)
-statusLabel.Position = UDim2.new(0, 5, 0, 0)
-statusLabel.Text = "Ready | Target: None"
-statusLabel.TextColor3 = Color3.fromRGB(0, 255, 100)
-statusLabel.Font = Enum.Font.Gotham
-statusLabel.TextSize = 12
-statusLabel.TextXAlignment = Enum.TextXAlignment.Left
-statusLabel.BackgroundTransparency = 1
-statusLabel.Parent = statusBar
-
--- Shorthand info
-local infoLabel = Instance.new("TextLabel")
-infoLabel.Size = UDim2.new(1, -20, 0, 20)
-infoLabel.Position = UDim2.new(0, 10, 1, -50)
-infoLabel.Text = "Tip: Use shorthand (first few letters)"
-infoLabel.TextColor3 = Color3.fromRGB(150, 200, 255)
-infoLabel.Font = Enum.Font.Gotham
-infoLabel.TextSize = 11
-infoLabel.BackgroundTransparency = 1
-infoLabel.Parent = mainFrame
 
 -- Player finder with enhanced shorthand
 local function findPlayer(username)
@@ -456,7 +427,7 @@ local function lineupNextToController()
     end
 end
 
--- Command parser (updated with !cmds)
+-- Command parser
 local function parseCommand(message)
     if not TARGET_USER then return end
     
@@ -622,44 +593,12 @@ minimizeButton.MouseButton1Click:Connect(function()
         inputFrame.Visible = false
         minimizeButton.Text = "+"
     else
-        mainFrame.Size = UDim2.new(0, 350, 0, 450)
+        mainFrame.Size = UDim2.new(0, 350, 0, 405)
         commandsFrame.Visible = true
         inputFrame.Visible = true
         minimizeButton.Text = "-"
     end
     isMinimized = not isMinimized
-end)
-
--- Status updater
-local function updateStatus()
-    local status = "Ready"
-    local color = Color3.fromRGB(0, 255, 100)
-    local targetName = TARGET_USER and TARGET_USER.Name or "None"
-    
-    if states.isSpinning then
-        status = "Spinning"
-        color = Color3.fromRGB(255, 150, 0)
-    elseif states.isFollowing then
-        status = "Following"
-        color = Color3.fromRGB(0, 200, 255)
-    elseif states.isLoopGoto then
-        status = "Loop Teleporting"
-        color = Color3.fromRGB(255, 100, 100)
-    elseif states.isFloating then
-        status = "Floating"
-        color = Color3.fromRGB(100, 200, 255)
-    end
-    
-    statusLabel.Text = string.format("%s | Target: %s", status, targetName)
-    statusLabel.TextColor3 = color
-end
-
--- Auto-update status
-spawn(function()
-    while screenGui.Parent do
-        updateStatus()
-        wait(0.1)
-    end
 end)
 
 -- Character respawn handler
@@ -678,7 +617,7 @@ end)
 
 -- Initialize
 setupChatListener()
-print("Trapit's Commands v2.0 loaded!")
+print("Trapit's Commands loaded!")
 print("Set target username to allow them to control you")
 
 -- Auto-attach to most recent target (optional)
@@ -696,4 +635,3 @@ spawn(function()
         end
     end
 end)
-
