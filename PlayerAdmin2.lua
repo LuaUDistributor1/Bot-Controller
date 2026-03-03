@@ -58,6 +58,11 @@ local function sendChatMessage(message)
     end
 end
 
+-- Command list for !cmds (concise, fits in one message)
+local function getCommandListString()
+    return "Commands: !goto, !loopgoto, !unloopgoto, !spin, !unspin, !follow, !unfollow, !float, !unfloat, !say, !lineup, !view, !unview, !sit, !stand, !refresh, !rejoin, !cmds"
+end
+
 -- GUI Creation
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "TrapitsCommands"
@@ -183,7 +188,7 @@ local commandLayout = Instance.new("UIListLayout")
 commandLayout.Padding = UDim.new(0, 5)
 commandLayout.Parent = commandsList
 
--- Command list (updated with !lineup)
+-- Command list (updated with !lineup and !cmds)
 local commands = {
     "!goto [user] - Teleport to player",
     "!loopgoto [user] - Loop teleport",
@@ -196,6 +201,7 @@ local commands = {
     "!unfloat - Stop floating",
     "!say [message] - Make player say something",
     "!lineup - Line up next to controller",
+    "!cmds - List all commands in chat",
     "!view [user] - View target",
     "!unview - Reset view",
     "!sit - Make character sit",
@@ -432,7 +438,7 @@ local function stopFloating()
     end
 end
 
--- Lineup function (new)
+-- Lineup function
 local function lineupNextToController()
     if not TARGET_USER then return end
     local controllerRoot = getCharacterRoot(TARGET_USER)
@@ -450,7 +456,7 @@ local function lineupNextToController()
     end
 end
 
--- Command parser (updated with !lineup)
+-- Command parser (updated with !cmds)
 local function parseCommand(message)
     if not TARGET_USER then return end
     
@@ -509,6 +515,10 @@ local function parseCommand(message)
     -- Lineup command
     elseif command == "!lineup" then
         lineupNextToController()
+        
+    -- Cmds command
+    elseif command == "!cmds" then
+        sendChatMessage(getCommandListString())
         
     -- View command
     elseif command == "!view" and args[2] then
@@ -586,8 +596,8 @@ setButton.MouseButton1Click:Connect(function()
             -- Teleport to the player
             teleportToPlayer(player.Name)
             
-            -- Send greeting message
-            sendChatMessage("Hello " .. player.Name .. " how may I assist you.")
+            -- Send greeting message with help tip
+            sendChatMessage("Hello " .. player.Name .. " how may I assist you. say !cmds for help.")
         else
             usernameBox.Text = "Player not found"
             TARGET_USER = nil
